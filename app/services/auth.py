@@ -113,7 +113,16 @@ def verify_mfa_with_rate_limiting(user: User, code: str) -> Tuple[bool, str | No
 def ensure_totp_secret(user: User) -> Tuple[str, str]:
     """Ensure user has a TOTP secret. Returns (base32_secret, otpauth_uri)."""
     if user.totp_secret_encrypted:
-        secret_b32 = decrypt_bytes(user.totp_secret_encrypted).decode("utf-8")
+        try:
+            secret_b32 = decrypt_bytes(user.totp_secret_encrypted).decode("utf-8")
+        except ValueError as e:
+            # If decryption fails, log the error and regenerate the secret
+            current_app.logger.error(f"Failed to decrypt TOTP secret for user {user.username}: {str(e)}")
+            current_app.logger.warning(f"Regenerating TOTP secret for user {user.username}")
+            secret_b32 = pyotp.random_base32()
+            user.totp_secret_encrypted = encrypt_bytes(secret_b32.encode("utf-8"))
+            db.session.add(user)
+            db.session.commit()
     else:
         secret_b32 = pyotp.random_base32()
         user.totp_secret_encrypted = encrypt_bytes(secret_b32.encode("utf-8"))
@@ -136,12 +145,20 @@ def verify_totp_code(user: User, code: str) -> bool:
     if not normalized.isdigit() or len(normalized) < 6:
         return False
 
-    secret_b32 = decrypt_bytes(user.totp_secret_encrypted).decode("utf-8")
-    totp = pyotp.TOTP(secret_b32)
-
-    # Use pyotp's built-in verification with a small valid_window to tolerate slight skew
-    # valid_window=1 allows previous/next step
-    return bool(totp.verify(normalized, valid_window=1))
+    try:
+        secret_b32 = decrypt_bytes(user.totp_secret_encrypted).decode("utf-8")
+        totp = pyotp.TOTP(secret_b32)
+        # Use pyotp's built-in verification with a small valid_window to tolerate slight skew
+        # valid_window=1 allows previous/next step
+        return bool(totp.verify(normalized, valid_window=1))
+    except ValueError as e:
+        # If decryption fails, log the error but don't crash
+        current_app.logger.error(f"Failed to decrypt TOTP secret for user {user.username} during verification: {str(e)}")
+        return False
+    except Exception as e:
+        # Catch any other unexpected errors
+        current_app.logger.error(f"Unexpected error during TOTP verification for user {user.username}: {str(e)}")
+        return False
 
 
 def generate_backup_codes(n: int = 8) -> list[str]:
