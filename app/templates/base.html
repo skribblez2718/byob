@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>About Me — Your Blog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body class="
+  {% if request.endpoint == 'blog.home' or request.path == '/' %}home-page{% endif %}
+  {% if not (request.endpoint == 'blog.home' or request.path == '/') %} radial-accent{% endif %}
+">
+  {% if request.endpoint == 'blog.home' or request.path == '/' %}
+  <!-- Full-width background image and single gradient overlay -->
+  <div class="page-image"></div>
+  <div class="page-gradient"></div>
+  {% endif %}
+
+  <!-- Global alert close behavior -->
+  <script src="{{ url_for('static', filename='js/alerts.js') }}" nonce="{{ g.script_nonce }}" defer></script>
+
+  <header class="site-header">
+    <div class="container">
+      <div class="header-brand">
+        <a class="brand" href="{{ url_for('blog.home') }}">
+          <span class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="28" height="28" role="img" aria-label="Logo">
+              <circle cx="16" cy="16" r="14" />
+              <text x="16" y="20" text-anchor="middle" font-size="12" fill="currentColor">KS</text>
+            </svg>
+          </span>
+          <!-- <span class="brand-name">@skribblez</span> -->
+        </a>
+      </div>
+
+      <div class="header-nav">
+        <nav class="primary-nav" aria-label="Primary">
+          <ul>
+            <li><a href="{{ url_for('blog.home') }}">Home</a></li>
+            <li><a href="{{ url_for('blog.resume') }}">Resume</a></li>
+            <li><a href="{{ url_for('blog.blog') }}">Blog</a></li>
+            <li><a href="{{ url_for('blog.projects') }}">Projects</a></li>
+            {% if current_user.is_authenticated and current_user.is_admin and current_user.mfa_passed %}
+            <li><a href="{{ url_for('admin.dashboard') }}">Admin Panel</a></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+
+      {% if current_user.is_authenticated and current_user.mfa_passed %}
+      <div class="header-user">
+        <div class="user-nav">
+          <a id="logout-link" href="{{ url_for('auth.logout') }}" class="logout-btn" aria-label="Log out">
+            <span class="logout-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Logout icon">
+                <!-- Circle -->
+                <circle cx="12" cy="12" r="7"></circle>
+                <!-- Arrow shaft starting at center of circle going left -->
+                <path d="M12 12H5"></path>
+                <!-- Left arrow head extended further outside the circle -->
+                <path d="M6 9l-5 3 5 3"></path>
+              </svg>
+            </span>
+            <strong>Logout</strong>
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <small>&copy; {{ config.get('SITE_NAME', 'Blog') }}</small>
+    </div>
+  </footer>
+
+  {% if js_modules is defined %}
+    {% if js_modules.admin_post %}
+      <script src="{{ url_for('static', filename='js/admin_post_form.js') }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endif %}
+    {% if js_modules.admin_resume %}
+      <script src="{{ url_for('static', filename='js/admin_resume.js') }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endif %}
+    {% if js_modules.admin_template_editor %}
+      <script src="{{ url_for('static', filename='js/admin_template_editor.js') }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endif %}
+    {% if js_modules.admin_blog %}
+      <script src="{{ url_for('static', filename='js/admin_blog.js') }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endif %}
+    {% if js_modules.admin_projects %}
+      <script src="{{ url_for('static', filename='js/admin_projects.js') }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endif %}
+    {% if js_modules.admin_dashboard %}
+      <script src="{{ url_for('static', filename='js/admin_dashboard.js') }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endif %}
+  {% endif %}
+
+  {# Page-specific scripts #}
+  {% if page_external_scripts is defined %}
+    {% for ext in page_external_scripts %}
+      <script src="{{ ext }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endfor %}
+  {% endif %}
+  {% if page_scripts is defined %}
+    {% for script in page_scripts %}
+      <script src="{{ url_for('static', filename=script) }}" nonce="{{ g.script_nonce }}" defer></script>
+    {% endfor %}
+  {% endif %}
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

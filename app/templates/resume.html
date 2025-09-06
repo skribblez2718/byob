@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}Resume{% endblock %}
+{% block content %}
+<div class="container">
+  <section class="page-content resume-page">
+    
+    <div id="top"></div>
+    
+    <hr class="accent-hr">
+    
+    <!-- Resume Navigation -->
+    <nav id="top" class="resume-nav">
+      <ul class="resume-nav-list">
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#work-history">Work History</a></li>
+        <li><a href="#certifications">Certifications</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#professional-development">Professional Development</a></li>
+      </ul>
+    </nav>
+    
+    <div class="content-body">
+      <!-- Skills Section -->
+      <section id="skills" class="resume-section">
+        <h2 class="resume-section-title">Skills</h2>
+        <hr class="resume-section-hr">
+        <div class="skills-grid">
+          {% for s in skills %}
+            <div class="skill-item">
+              <h3>{{ s.skill_title }}</h3>
+              <hr class="skill-divider">
+              <p>{{ s.skill_description }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+      
+      <!-- Work History Section -->
+      <section id="work-history" class="resume-section">
+        <h2 class="resume-section-title">Work History</h2>
+        <hr class="resume-section-hr">
+        <div class="work-history-list">
+          {% for w in work_items %}
+            <article class="work-item">
+              <div class="work-header">
+                <div class="company-logo">
+                  {% if w.work_history_image_url %}
+                    <img src="{{ url_for('static', filename=w.work_history_image_url) }}" alt="{{ w.work_history_company_name }}" class="item-image">
+                  {% endif %}
+                </div>
+                <div class="work-details">
+                  <div class="work-title-line">
+                    <h3><strong>{{ w.work_history_company_name }}</strong></h3>
+                    <div class="work-meta">
+                      <span class="work-period">{{ w.work_history_dates }}</span>
+                    </div>
+                  </div>
+                  <div class="work-role">
+                    <strong>{{ w.work_history_role }}</strong>
+                  </div>
+                  {% if w.work_history_role_description %}
+                    <p class="work-description">{{ w.work_history_role_description }}</p>
+                  {% endif %}
+                  {% if w.accomplishments %}
+                    <ul class="work-accomplishments">
+                      {% for a in w.accomplishments %}
+                        <li>{{ a.accomplishment_text }}</li>
+                      {% endfor %}
+                    </ul>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+      
+      <!-- Certifications Section -->
+      <section id="certifications" class="resume-section">
+        <h2 class="resume-section-title">Certifications</h2>
+        <hr class="resume-section-hr">
+        <div class="work-history-list">
+          {% for c in certs %}
+            <article class="work-item">
+              <div class="work-header">
+                <div class="company-logo">
+                  {% if c.certification_image_url %}
+                    <img src="{{ url_for('static', filename=c.certification_image_url) }}" alt="{{ c.certification_title }}" class="item-image">
+                  {% endif %}
+                </div>
+                <div class="work-details">
+                  <div class="work-title-line">
+                    <h3><strong>{{ c.certification_title }}</strong></h3>
+                  </div>
+                  {% if c.certification_description %}
+                    <p class="work-description">{{ c.certification_description }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+      
+      <!-- Education Section -->
+      <section id="education" class="resume-section">
+        <h2 class="resume-section-title">Education</h2>
+        <hr class="resume-section-hr">
+        <div class="work-history-list">
+          {% for e in education %}
+            <article class="work-item">
+              <div class="work-header">
+                <div class="company-logo">
+                  {% if e.education_image_url %}
+                    <img src="{{ url_for('static', filename=e.education_image_url) }}" alt="{{ e.education_title }}" class="item-image">
+                  {% endif %}
+                </div>
+                <div class="work-details">
+                  <div class="work-title-line">
+                    <h3><strong>{{ e.education_title }}</strong></h3>
+                  </div>
+                  {% if e.education_description %}
+                    <p class="work-description">{{ e.education_description }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+      
+      <!-- Professional Development Section -->
+      <section id="professional-development" class="resume-section">
+        <h2 class="resume-section-title">Professional Development</h2>
+        <hr class="resume-section-hr">
+        <div class="work-history-list">
+          {% for p in profdev %}
+            <article class="work-item">
+              <div class="work-header">
+                <div class="company-logo">
+                  {% if p.professional_development_image_url %}
+                    <img src="{{ url_for('static', filename=p.professional_development_image_url) }}" alt="{{ p.professional_development_title }}" class="item-image">
+                  {% endif %}
+                </div>
+                <div class="work-details">
+                  <div class="work-title-line">
+                    <h3><strong>{{ p.professional_development_title }}</strong></h3>
+                  </div>
+                  {% if p.professional_development_description %}
+                    <p class="work-description">{{ p.professional_development_description }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </section>
+  
+  <!-- Back to Top Link -->
+  <a href="#top" class="back-to-top-btn" title="Back to Top">
+    ↑
+  </a>
+</div>
+{% endblock %}

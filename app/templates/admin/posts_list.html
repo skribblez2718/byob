@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="posts-container">
+  <div class="posts-header">
+    <h1>{{ title }}</h1>
+    <div>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+  </div>
+  <hr class="accent-hr" />
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% if posts %}
+    <table class="posts-table">
+      <colgroup>
+        <col class="col-title" />
+        <col class="col-category" />
+        <col class="col-created" />
+        <col class="col-updated" />
+        <col class="col-actions" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="col-title">Title</th>
+          <th class="col-category">Category</th>
+          <th class="col-created">Created</th>
+          <th class="col-updated">Updated</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for post in posts %}
+        <tr>
+          <td class="col-title">
+            <div class="post-title">{{ post.title }}</div>
+            {% if post.excerpt %}
+              <div class="post-excerpt">{{ post.excerpt[:100] }}{% if post.excerpt|length > 100 %}...{% endif %}</div>
+            {% endif %}
+          </td>
+          <td class="col-category">
+            {% if post.category %}
+              {{ post.category.name }}
+            {% else %}
+              <span class="post-meta">Uncategorized</span>
+            {% endif %}
+          </td>
+          <td class="col-created post-meta">
+            {{ post.created_at.strftime('%Y-%m-%d') if post.created_at else 'N/A' }}
+          </td>
+          <td class="col-updated post-meta">
+            {{ post.updated_at.strftime('%Y-%m-%d') if post.updated_at else 'N/A' }}
+          </td>
+          <td class="col-actions">
+            <div class="post-actions">
+              <a href="{{ url_for('blog.post_detail', slug=post.slug) }}" class="btn btn-sm btn-success" target="_blank">View</a>
+              <a href="{{ url_for('admin.post_edit', post_hex_id=post.hex_id) }}" class="btn btn-sm btn-primary">Edit</a>
+              <form method="post" action="{{ url_for('admin.post_delete', post_hex_id=post.hex_id) }}" class="inline-form">
+                {{ delete_form.csrf_token }}
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="center-actions admin-list-actions">
+      <a href="{{ url_for('admin.post_new') }}" class="btn btn-green">+ New Post</a>
+    </div>
+
+    <!-- Pagination -->
+    {% if total > per_page %}
+    <div class="pagination">
+      {% if page > 1 %}
+        <a href="{{ url_for('admin.posts_list', page=page-1) }}">← Previous</a>
+      {% endif %}
+      
+      {% for p in range(1, (total // per_page) + 2) %}
+        {% if p == page %}
+          <span class="current">{{ p }}</span>
+        {% else %}
+          <a href="{{ url_for('admin.posts_list', page=p) }}">{{ p }}</a>
+        {% endif %}
+      {% endfor %}
+      
+      {% if page < (total // per_page) + 1 %}
+        <a href="{{ url_for('admin.posts_list', page=page+1) }}">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  {% else %}
+    <div class="no-posts">
+      <h3>No blog posts yet</h3>
+      <p>Create your first blog post to get started!</p>
+      <a href="{{ url_for('admin.post_new') }}" class="btn btn-green">+ New Post</a>
+    </div>
+  {% endif %}
+</div>
+
+{# Inline script removed; handled by static/js/admin_blog.js loaded via base.html when js_modules.admin_blog is set #}
+{% endblock %}

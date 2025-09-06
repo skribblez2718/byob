@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Manage Projects{% endblock %}
+
+{% block content %}
+<div class="posts-container">
+  <div class="posts-header">
+    <h1>{{ title or 'Manage Projects' }}</h1>
+    <div>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+  </div>
+  <hr class="accent-hr" />
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% if projects and projects|length > 0 %}
+    <table class="posts-table">
+      <colgroup>
+        <col class="col-title" />
+        <col class="col-created" />
+        <col class="col-updated" />
+        <col class="col-actions" />
+      </colgroup>
+      <thead>
+        <tr>
+          <th class="col-title">Project</th>
+          <th class="col-created">Created</th>
+          <th class="col-updated">Updated</th>
+          <th class="col-actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in projects %}
+        <tr>
+          <td class="col-title">
+            <div class="admin-project-cell">
+              {% if p.project_image_url %}
+                <img src="{{ url_for('static', filename=p.project_image_url) }}" alt="Project image" class="project-thumb-56" />
+              {% else %}
+                <div class="thumb-placeholder-56"></div>
+              {% endif %}
+              <div>
+                <div class="post-title">{{ p.project_title }}</div>
+                {% if p.project_description %}
+                  <div class="post-excerpt">{{ p.project_description[:100] }}{% if p.project_description|length > 100 %}...{% endif %}</div>
+                {% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="col-created post-meta">
+            {{ p.created_at.strftime('%Y-%m-%d') if p.created_at is defined and p.created_at else '—' }}
+          </td>
+          <td class="col-updated post-meta">
+            {{ p.updated_at.strftime('%Y-%m-%d') if p.updated_at is defined and p.updated_at else '—' }}
+          </td>
+          <td class="col-actions">
+            <div class="post-actions">
+              {% if p.project_url %}
+                <a href="{{ p.project_url }}" class="btn btn-sm btn-success" target="_blank">View</a>
+              {% endif %}
+              <a href="{{ url_for('admin.project_edit', project_hex_id=p.hex_id) }}" class="btn btn-sm btn-primary">Edit</a>
+              <form method="post" action="{{ url_for('admin.project_delete', project_hex_id=p.hex_id) }}" class="inline-form">
+                {{ delete_form.csrf_token }}
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="center-actions admin-list-actions">
+      <a href="{{ url_for('admin.project_new') }}" class="btn btn-green">+ New Project</a>
+    </div>
+
+  {% else %}
+    <div class="no-posts">
+      <h3>No projects yet</h3>
+      <p>Create your first project to get started!</p>
+      <div class="center-actions admin-list-actions">
+        <a href="{{ url_for('admin.project_new') }}" class="btn btn-green">+ New Project</a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

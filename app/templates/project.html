@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Projects{% endblock %}
+{% block content %}
+<div class="container projects-page">
+  <section class="page-content">
+    <div class="page-header">
+      <h1>Projects</h1>
+      
+    </div>
+    
+    <hr class="accent-hr">
+    
+    <div class="content-body">
+      {% if projects %}
+        <div class="projects-list">
+          {% for project in projects %}
+            <article class="project-item">
+              <div class="project-header">
+                <div class="project-logo">
+                  {% if project.project_image_url %}
+                    <img src="{{ url_for('static', filename=project.project_image_url) }}" alt="{{ project.project_title }} logo" class="item-image">
+                  {% else %}
+                    <img src="{{ url_for('static', filename='img/default-project.png') }}" alt="Default project logo" class="item-image">
+                  {% endif %}
+                </div>
+                <div class="project-title-line">
+                  <h3>{{ project.project_title }}</h3>
+                  {% if project.project_url %}
+                    <span class="project-links">
+                      <a href="{{ project.project_url }}" target="_blank" rel="noopener">{{ project.project_url }}</a>
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+              <hr class="project-divider">
+              {% if project.project_description %}
+                <p class="project-description">
+                  {{ project.project_description }}
+                </p>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-projects">
+          <p>No projects available at the moment. Check back soon!</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

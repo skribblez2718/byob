@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Edit Projects{% endblock %}
+{% block content %}
+<div class="container admin-projects">
+  <section class="page-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+          </div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" enctype="multipart/form-data" id="projects-form" class="admin-form">
+      {{ form.csrf_token }}
+
+      <h2>Projects</h2>
+      <hr class="accent-hr admin-tight-hr" />
+      <div id="projects-list" class="list-section" data-list-name="projects">
+        {% for subform in form.projects %}
+          <div class="item" data-role="project">
+            <div class="form-group">
+                {% if subform.form.project_image_url.data %}
+                    <div class="current-image admin-image-gap">
+                        <img src="{{ url_for('static', filename=subform.form.project_image_url.data) }}" alt="Current Image" class="item-image">
+                    </div>
+                {% endif %}
+                {{ subform.form.project_image_url(type='hidden') }}
+                {{ subform.form.remove_image(type='hidden') }}
+                <label class="form-label">{{ subform.form.project_image.label.text }}</label>
+                {{ subform.form.project_image() }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.project_title.label.text }}</label>
+              {{ subform.form.project_title(class='form-input') }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.project_description.label.text }}</label>
+              {{ subform.form.project_description(class='form-textarea', rows='3') }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.project_url.label.text }}</label>
+              {{ subform.form.project_url(class='form-input') }}
+            </div>
+            <div class="form-group center-actions">
+              {{ subform.form.delete() }}
+              <button type="button" class="btn btn-outline-danger btn-small mark-delete">Remove Project</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="section-actions">
+        <button type="button" id="add-project" class="btn btn-secondary">+ Add Project</button>
+      </div>
+
+      <div class="save-actions">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+        {{ form.submit(class='btn btn-primary save-btn') }}
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

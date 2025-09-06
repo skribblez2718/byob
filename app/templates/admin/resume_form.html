@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Edit Resume{% endblock %}
+{% block content %}
+<div class="container admin-resume">
+  <section class="page-content">
+    <div class="form-header">
+      <h1>Edit Resume</h1>
+      <div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+      </div>
+    </div>
+    <hr class="accent-hr" />
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" enctype="multipart/form-data" id="resume-form" class="admin-form">
+      {{ form.csrf_token }}
+
+      <h2>Skills</h2>
+      <hr class="accent-hr admin-tight-hr" />
+      <div id="skills-list" class="list-section" data-list-name="skills">
+        {% for subform in form.skills %}
+          <div class="item" data-role="skill">
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.skill_title.label.text }}</label>
+              {{ subform.form.skill_title(class='form-input') }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.skill_description.label.text }}</label>
+              {{ subform.form.skill_description(class='form-textarea', rows='3') }}
+            </div>
+            <div class="form-group center-actions">
+              {{ subform.form.delete() }}
+              <button type="button" class="btn btn-outline-danger btn-small mark-delete">Remove Skill</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="section-actions">
+        <button type="button" id="add-skill" class="btn btn-secondary">+ Add Skill</button>
+      </div>
+
+      <h2>Work History</h2>
+      <hr class="accent-hr admin-tight-hr" />
+      <div id="work-list" class="list-section" data-list-name="work_history">
+        {% for subform in form.work_history %}
+          <div class="item" data-role="work">
+            <div class="form-group">
+                {% if subform.form.work_history_image_url.data %}
+                    <div class="current-image admin-image-gap">
+                        <img src="{{ url_for('static', filename=subform.form.work_history_image_url.data) }}" alt="Current Image" class="item-image">
+                    </div>
+                {% endif %}
+              {{ subform.form.work_history_image_url(type='hidden') }}
+              <label class="form-label">{{ subform.form.work_history_image.label.text }}</label>
+              {{ subform.form.work_history_image() }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.work_history_company_name.label.text }}</label>
+              {{ subform.form.work_history_company_name(class='form-input') }}
+            </div>
+            <div class="form-group form-row">
+              <div class="flex-1">
+                <label class="form-label">{{ subform.form.work_history_dates.label.text }}</label>
+                {{ subform.form.work_history_dates(class='form-input') }}
+              </div>
+              <div class="flex-1">
+                <label class="form-label">{{ subform.form.work_history_role.label.text }}</label>
+                {{ subform.form.work_history_role(class='form-input') }}
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.work_history_role_description.label.text }}</label>
+              {{ subform.form.work_history_role_description(class='form-textarea', rows='3') }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">Accomplishments</label>
+              <div class="accomplishments">
+                {% for a in subform.form.accomplishments %}
+                  <div class="acc-item">
+                    {{ a.form.accomplishment_text(class='form-input') }}
+                    {{ a.form.delete() }}
+                    <button type="button" class="btn btn-outline-danger btn-small mark-delete-accomplishment">Remove Accomplishment</button>
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="section-actions">
+                <button type="button" class="btn btn-secondary btn-small add-accomplishment" data-work-index="{{ loop.index0 }}">+ Add Accomplishment</button>
+              </div>
+            </div>
+            <div class="form-group center-actions">
+              {{ subform.form.delete() }}
+              <button type="button" class="btn btn-outline-danger btn-small mark-delete">Remove Work Item</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="section-actions">
+        <button type="button" id="add-work-item" class="btn btn-secondary">+ Add Work Item</button>
+      </div>
+
+      <h2>Certifications</h2>
+      <hr class="accent-hr admin-tight-hr" />
+      <div id="certs-list" class="list-section" data-list-name="certifications">
+        {% for subform in form.certifications %}
+          <div class="item" data-role="cert">
+            <div class="form-group">
+                {% if subform.form.image_url.data %}
+                    <div class="current-image admin-image-gap">
+                        <img src="{{ url_for('static', filename=subform.form.image_url.data) }}" alt="Current Image" class="item-image">
+                    </div>
+                {% endif %}
+              {{ subform.form.image_url(type='hidden') }}
+              <label class="form-label">{{ subform.form.image.label.text }}</label>
+              {{ subform.form.image() }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.title.label.text }}</label>
+              {{ subform.form.title(class='form-input') }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.description.label.text }}</label>
+              {{ subform.form.description(class='form-textarea', rows='2') }}
+            </div>
+            <div class="form-group center-actions">{{ subform.form.delete() }}<button type="button" class="btn btn-outline-danger btn-small mark-delete">Remove Certification</button></div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="section-actions">
+        <button type="button" id="add-cert" class="btn btn-secondary">+ Add Certification</button>
+      </div>
+
+      <h2>Education</h2>
+      <hr class="accent-hr admin-tight-hr" />
+      <div id="education-list" class="list-section" data-list-name="education">
+        {% for subform in form.education %}
+          <div class="item" data-role="education">
+            <div class="form-group">
+              {% if subform.form.image_url.data %}
+                <div class="current-image admin-image-gap">
+                  <img src="{{ url_for('static', filename=subform.form.image_url.data) }}" alt="Current Image" class="item-image">
+                </div>
+              {% endif %}
+              {{ subform.form.image_url(type='hidden') }}
+              <label class="form-label">{{ subform.form.image.label.text }}</label>
+              {{ subform.form.image() }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.title.label.text }}</label>
+              {{ subform.form.title(class='form-input') }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.description.label.text }}</label>
+              {{ subform.form.description(class='form-textarea', rows='2') }}
+            </div>
+            <div class="form-group center-actions">
+              {{ subform.form.delete() }}
+              <button type="button" class="btn btn-outline-danger btn-small mark-delete">Remove Education</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="section-actions">
+        <button type="button" id="add-education" class="btn btn-secondary">+ Add Education</button>
+      </div>
+
+      <h2>Professional Development</h2>
+      <hr class="accent-hr admin-tight-hr" />
+      <div id="pd-list" class="list-section" data-list-name="professional_development">
+        {% for subform in form.professional_development %}
+          <div class="item" data-role="pd">
+            <div class="form-group">
+                {% if subform.form.image_url.data %}
+                    <div class="current-image admin-image-gap">
+                        <img src="{{ url_for('static', filename=subform.form.image_url.data) }}" alt="Current Image" class="item-image">
+                    </div>
+                {% endif %}
+                {{ subform.form.image_url(type='hidden') }}
+                <label class="form-label">{{ subform.form.image.label.text }}</label>
+                {{ subform.form.image() }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.title.label.text }}</label>
+              {{ subform.form.title(class='form-input') }}
+            </div>
+            <div class="form-group">
+              <label class="form-label">{{ subform.form.description.label.text }}</label>
+              {{ subform.form.description(class='form-textarea', rows='2') }}
+            </div>
+            <div class="form-group center-actions">
+              {{ subform.form.delete() }}
+              <button type="button" class="btn btn-outline-danger btn-small mark-delete">Remove Professional Development</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="section-actions">
+        <button type="button" id="add-pd" class="btn btn-secondary">+ Add Professional Development</button>
+      </div>
+
+      <div class="save-actions">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+        {{ form.submit(class='btn btn-primary save-btn') }}
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
+
+

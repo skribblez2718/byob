@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="login-container">
+  <div class="login-form-wrapper">
+    {% if needs_setup %}
+      <!-- First-time MFA setup -->
+      <div class="login-header">
+        <h1>Setup Two-Factor Authentication</h1>
+        <p>Scan the QR code with your Yubico Authenticator app and enter the verification code</p>
+      </div>
+
+      <div class="mfa-setup">
+        <div class="qr-code-container">
+          <img src="{{ url_for('auth.qr_code') }}" alt="QR Code for MFA Setup" class="qr-code-image">
+        </div>
+        
+        <div class="secret-key">
+          <p><strong>Manual entry key:</strong></p>
+          <code id="secretKey">{{ secret }}</code>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-messages">
+              {% for category, message in messages %}
+                <div class="flash-message flash-{{ category }} {% if 'locked' in message or 'attempts remaining' in message %}rate-limit-warning{% endif %}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" class="login-form">
+          {{ form.hidden_tag() }}
+          
+          <div class="form-group">
+            {{ form.code.label(class="form-label") }}
+            {{ form.code(class="form-input", placeholder="Enter 6-digit code from your authenticator", autofocus=true) }}
+            {% if form.code.errors %}
+              <div class="error-message">
+                {% for error in form.code.errors %}
+                  <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          {{ form.submit(class="login-button", value="Complete Setup") }}
+        </form>
+      </div>
+    {% else %}
+      <!-- Regular MFA verification -->
+      <div class="login-header">
+        <h1>Two-Factor Authentication</h1>
+        <p>Enter the verification code from your authenticator app</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-messages">
+            {% for category, message in messages %}
+              <div class="flash-message flash-{{ category }} {% if 'locked' in message or 'attempts remaining' in message %}rate-limit-warning{% endif %}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" class="login-form">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+          {{ form.code.label(class="form-label") }}
+          {{ form.code(class="form-input", placeholder="Enter 6-digit code", autofocus=true) }}
+          {% if form.code.errors %}
+            <div class="error-message">
+              {% for error in form.code.errors %}
+                <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        {{ form.submit(class="login-button", value="Verify") }}
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

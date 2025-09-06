@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Edit Project{% endblock %}
+{% block content %}
+<div class="container admin-projects">
+  <section class="page-content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+          </div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" enctype="multipart/form-data" id="projects-form" class="admin-form">
+      {{ form.csrf_token }}
+
+      <h2>Project</h2>
+      <hr class="accent-hr admin-tight-hr" />
+
+      {# Expect exactly one entry preloaded in the view #}
+      {% set entry = form.projects.entries[0].form %}
+      <div class="item" data-role="project">
+        <div class="form-group">
+          {% if entry.project_image_url.data %}
+            <div class="current-image admin-image-gap">
+              <img src="{{ url_for('static', filename=entry.project_image_url.data) }}" alt="Current Image" class="item-image">
+            </div>
+          {% endif %}
+          {{ entry.project_image_url(type='hidden') }}
+          <label class="form-label" for="projects-0-project_image">Project Image (PNG/JPEG/WEBP)</label>
+          <input type="file" id="projects-0-project_image" name="projects-0-project_image" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ entry.project_title.label.text }}</label>
+          {{ entry.project_title(class='form-input') }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ entry.project_description.label.text }}</label>
+          {{ entry.project_description(class='form-textarea', rows='3') }}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ entry.project_url.label.text }}</label>
+          {{ entry.project_url(class='form-input') }}
+        </div>
+      </div>
+
+      <div class="save-actions">
+        <a href="{{ url_for('admin.projects_editor') }}" class="btn btn-secondary">Cancel</a>
+        {{ form.submit(class='btn btn-primary save-btn') }}
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

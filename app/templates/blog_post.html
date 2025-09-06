@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+<div class="container">
+  <article class="blog-post">
+    <header class="post-header">
+      <div class="post-meta">
+        {% if post.category %}
+          <a href="{{ url_for('blog.by_category', slug=post.category.slug) }}" class="post-category">{{ post.category.name }}</a>
+        {% endif %}
+        <time class="post-date">{{ post.created_at.strftime('%B %d, %Y') if post.created_at else 'Unknown date' }}</time>
+      </div>
+      <h1 class="post-title">{{ post.title }}</h1>
+      <hr class="accent-hr">
+    </header>
+
+    {% if post.image_data %}
+      <div class="post-featured-image">
+        <img src="{{ url_for('admin.post_image', post_hex_id=post.hex_id) }}" alt="{{ post.title }}" loading="lazy">
+      </div>
+    {% endif %}
+
+    <div class="post-content">
+      {% if post.content_blocks %}
+        {% for blk in post.content_blocks | sort(attribute='order') %}
+          {% if blk.type == 'heading' %}
+            {% set lvl = blk.level if blk.level in [2,3,4,5] else 2 %}
+            {% if lvl == 2 %}<h2 class="post-heading h2">{{ blk.text }}</h2>{% endif %}
+            {% if lvl == 3 %}<h3 class="post-heading h3">{{ blk.text }}</h3>{% endif %}
+            {% if lvl == 4 %}<h4 class="post-heading h4">{{ blk.text }}</h4>{% endif %}
+            {% if lvl == 5 %}<h5 class="post-heading h5">{{ blk.text }}</h5>{% endif %}
+          {% elif blk.type == 'paragraph' %}
+            <p>{{ blk.text | safe_paragraph }}</p>
+          {% elif blk.type == 'image' %}
+            <figure class="post-img"><img src="{{ blk.src }}" alt="{{ blk.alt or '' }}" loading="lazy"></figure>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <footer class="post-footer">
+      <div class="post-author">
+        <strong>By {{ post.author.username }}</strong>
+      </div>
+      {% if post.updated_at and post.updated_at != post.created_at %}
+        <div class="post-updated">
+          <small>Last updated: {{ post.updated_at.strftime('%B %d, %Y') }}</small>
+        </div>
+      {% endif %}
+    </footer>
+  </article>
+
+  <!-- Related Posts -->
+  {% if related_posts %}
+    <section class="related-posts">
+      <h2>Related Posts</h2>
+      <div class="related-posts-grid">
+        {% for related_post in related_posts %}
+          <article class="related-post-card">
+            <h3><a href="{{ url_for('blog.post_detail', slug=related_post.slug) }}">{{ related_post.title }}</a></h3>
+            {% if related_post.excerpt %}
+              <p>{{ related_post.excerpt[:100] }}{% if related_post.excerpt|length > 100 %}...{% endif %}</p>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Navigation -->
+  <div class="post-navigation">
+    <a href="{{ url_for('blog.blog') }}" class="back-to-blog">← Back to Blog</a>
+  </div>
+</div>
+
+{% endblock %}

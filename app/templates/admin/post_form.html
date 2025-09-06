@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="blog-form-container">
+  <div class="form-header">
+    <h1>{{ title }}</h1>
+    <div>
+      {% if post %}
+        <a href="{{ url_for('admin.posts_list') }}" class="btn btn-secondary">← Back to Posts</a>
+      {% else %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">← Back to Dashboard</a>
+      {% endif %}
+    </div>
+  </div>
+  <hr class="accent-hr" />
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">
+            {{ message }}
+            <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST" enctype="multipart/form-data" action="{{ action_url }}" class="blog-form">
+    {{ form.hidden_tag() }}
+
+    {# Global form errors (e.g., CSRF or non-field) #}
+    {% if form.errors %}
+      <div class="error-message mb-4">
+        <strong>There were errors with your submission.</strong>
+        {% if form.csrf_token and form.csrf_token.errors %}
+          <div>Security token error: {% for e in form.csrf_token.errors %}<span>{{ e }}</span>{% endfor %}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+    
+    <div class="form-row">
+      <div class="form-group">
+        {{ form.title.label(class="form-label") }}
+        {{ form.title() }}
+        {% if form.title.errors %}
+          <div class="error-message">
+            {% for error in form.title.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        {{ form.category_id.label(class="form-label") }}
+        {{ form.category_id() }}
+        {% if form.category_id.errors %}
+          <div class="error-message">
+            {% for error in form.category_id.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-group">
+      {{ form.excerpt.label(class="form-label") }}
+      {{ form.excerpt() }}
+      {% if form.excerpt.errors %}
+        <div class="error-message">
+          {% for error in form.excerpt.errors %}
+            <span>{{ error }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <small class="form-help">Excerpt is required (1-300 chars) and will be displayed in post previews</small>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Featured Image</label>
+      <div class="image-upload-section">
+        {{ form.featured_image() }}
+        {% if form.featured_image.errors %}
+          <div class="error-message">
+            {% for error in form.featured_image.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+        <p class="form-help">Upload a featured image for your blog post (optional)</p>
+      </div>
+    </div>
+
+
+    <div class="form-group">
+      <label class="form-label">Content Blocks</label>
+      <div id="blocks-container" class="blocks-container" data-prefix="content_blocks">
+        {# Render existing blocks #}
+        {% for entry in form.content_blocks %}
+          <div class="block-item" data-index="{{ loop.index0 }}">
+            <div class="block-fields">
+              <div class="field-row">
+                <label>Type</label>
+                {{ entry.form.type(class='form-select', **{'data-field': 'type'}) }}
+                <label>Order</label>
+                {{ entry.form.order(class='form-control order-input', **{'data-field': 'order'}) }}
+              </div>
+              <div class="field-row heading-row">
+                <label>Level</label>
+                {{ entry.form.heading_level(class='form-select', **{'data-field': 'heading_level'}) }}
+              </div>
+              <div class="field-row text-row">
+                <label>Text</label>
+                {{ entry.form.text(class='form-control', **{'data-field': 'text'}) }}
+              </div>
+              <div class="field-row image-row">
+                {{ entry.form.existing_src(**{'data-field': 'existing_src'}) }}
+                <label>Image</label>
+                {{ entry.form.image(**{'data-field': 'image'}) }}
+                <label>Alt</label>
+                {{ entry.form.alt(class='form-control', **{'data-field': 'alt'}) }}
+                {% if entry.form.existing_src.data %}
+                  <div class="image-preview">
+                    <img src="{{ entry.form.existing_src.data }}" alt="preview" />
+                  </div>
+                {% endif %}
+              </div>
+              {% if entry.form.text.errors %}
+                <div class="error-message">
+                  {% for error in entry.form.text.errors %}
+                    <span>{{ error }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="block-controls">
+              <button type="button" class="btn btn-xs" data-move="up">↑</button>
+              <button type="button" class="btn btn-xs" data-move="down">↓</button>
+              <label class="inline">{{ entry.form.delete(**{'data-field': 'delete'}) }} Delete</label>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% if form.content_blocks.errors %}
+        <div class="error-message mt-2">
+          {% for error in form.content_blocks.errors %}
+            <span>{{ error }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <small class="form-help">Reorder blocks with arrows. Delete marks a block for removal. Images are validated on submit.</small>
+      <div class="block-toolbar">
+        <button type="button" class="btn btn-small" data-action="add-heading">Add Heading</button>
+        <button type="button" class="btn btn-small" data-action="add-paragraph">Add Paragraph</button>
+        <button type="button" class="btn btn-small" data-action="add-image">Add Image</button>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      {{ form.submit() }}
+      {% if post %}
+        <a href="{{ url_for('admin.posts_list') }}" class="btn btn-secondary">Cancel</a>
+      {% else %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Cancel</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

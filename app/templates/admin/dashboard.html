@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-dashboard">
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <p>Welcome back, {{ current_user.username }}! Manage your blog content below.</p>
+  </div>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="dashboard-actions">
+    <div class="action-section">
+      <div class="action-buttons">
+        <!-- <a href="{{ url_for('admin.post_new') }}" class="btn btn-create">
+          <i class="icon-edit"></i> Create Blog Post
+        </a> -->
+        <a href="{{ url_for('admin.posts_list') }}" class="btn btn-manage">
+          Manage Posts
+        </a>
+        <a href="{{ url_for('admin.projects_editor') }}" class="btn btn-create">
+          Manage Projects
+        </a>
+        <a href="{{ url_for('admin.resume_editor') }}" class="btn btn-create">
+          Manage Resume
+        </a>
+        <a href="{{ url_for('admin.categories_list') }}" class="btn btn-create">
+          Manage Categories
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Stats -->
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <h3>{{ categories|length }}</h3>
+      <p>Categories</p>
+    </div>
+    <div class="stat-card">
+      <h3>{{ total_posts }}</h3>
+      <p>Blog Posts</p>
+    </div>
+  </div>
+
+  <!-- Recent Content -->
+  <div class="dashboard-content">
+    <div class="stat-card">
+      <h2>Categories</h2>
+      {% if categories %}
+        <div class="category-list">
+          {% for category in categories %}
+            <div class="category-item">
+              <h4><a href="{{ url_for('blog.by_category', slug=category.slug) }}">{{ category.name }}</a></h4>
+              <p>{{ category.description or 'No description' }}</p>
+              <small>Slug: {{ category.slug }}</small>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">No categories yet. <a href="{{ url_for('admin.category_new') }}">Create your first category</a>.</p>
+      {% endif %}
+    </div>
+
+    <div class="stat-card">
+      <h2>Recent Posts</h2>
+      {% if posts %}
+        <div class="post-list">
+          {% for post in posts %}
+            <div class="post-item">
+              <h4><a href="{{ url_for('blog.post_detail', slug=post.slug) }}">{{ post.title }}</a></h4>
+              <p>{{ post.excerpt or 'No excerpt' }}</p>
+              <div class="post-meta">
+                <small>Category: {{ post.category.name if post.category else 'Uncategorized' }}</small>
+                <small>Created: {{ post.created_at.strftime('%Y-%m-%d') }}</small>
+                <small>Status: {{ 'Published' if post.published else 'Draft' }}</small>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty-state">No blog posts yet. <a href="{{ url_for('admin.post_new') }}">Create your first post</a>.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}

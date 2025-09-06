@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ post.title }} - My Blog{% endblock %}
+{% block content %}
+<div class="container">
+  <section class="page-content">
+    <div class="page-header">
+      <h1>{{ post.title }}</h1>
+    </div>
+    
+    <hr class="accent-hr">
+    
+    <div class="content-body">
+      {% if post.image_mime %}
+        <figure class="content-image">
+          <img src="{{ url_for('blog.media_post', post_hex_id=post.hex_id) }}" alt="{{ post.title }}" />
+        </figure>
+      {% endif %}
+      <div class="post-body">
+        {% if post.content_blocks %}
+          {% for blk in post.content_blocks | sort(attribute='order') %}
+            {% if blk.type == 'heading' %}
+              {% set lvl = blk.level if blk.level in [2,3,4,5] else 2 %}
+              {% if lvl == 2 %}<h2 class="post-heading h2">{{ blk.text }}</h2>{% endif %}
+              {% if lvl == 3 %}<h3 class="post-heading h3">{{ blk.text }}</h3>{% endif %}
+              {% if lvl == 4 %}<h4 class="post-heading h4">{{ blk.text }}</h4>{% endif %}
+              {% if lvl == 5 %}<h5 class="post-heading h5">{{ blk.text }}</h5>{% endif %}
+            {% elif blk.type == 'paragraph' %}
+              <p>{{ blk.text | safe_paragraph }}</p>
+            {% elif blk.type == 'image' %}
+              <figure class="post-img"><img src="{{ blk.src }}" alt="{{ blk.alt or '' }}"></figure>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
