@@ -14,8 +14,12 @@ from app.blueprints.auth import bp
 @login_required
 def qr_code():
     """Generate QR code for MFA setup"""
-    if not current_user.is_authenticated or current_user.mfa_setup_completed:
+    if not current_user.is_authenticated:
         return "Unauthorized", 403
+    
+    # Allow QR code generation if MFA setup is not completed OR if user has no TOTP secret
+    if current_user.mfa_setup_completed and current_user.totp_secret_encrypted:
+        return "MFA already set up", 403
 
     secret_b32, otp_uri = auth_svc.ensure_totp_secret(current_user)
 

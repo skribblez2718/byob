@@ -34,6 +34,7 @@ def projects_editor():
             title='Manage Projects',
             projects=projects,
             delete_form=delete_form,
+            js_modules={'admin_projects': True},
         )
     
     # Common context for rendering edit view after POST (validation errors)
@@ -244,7 +245,7 @@ def project_new():
         context = {
             'title': 'New Project',
             'form': form,
-            'js_modules': {'admin_projects': True},
+            'js_modules': {},
             'target_id': None,
         }
         return render_template('admin/projects_form.html', **context)
@@ -310,7 +311,7 @@ def project_new():
     context = {
         'title': 'New Project',
         'form': form,
-        'js_modules': {'admin_projects': True},
+        'js_modules': {},
         'target_id': None,
     }
     return render_template('admin/projects_form.html', **context)

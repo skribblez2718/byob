@@ -47,15 +47,8 @@
               <label class="form-label">{{ subform.form.project_url.label.text }}</label>
               {{ subform.form.project_url(class='form-input') }}
             </div>
-            <div class="form-group center-actions">
-              {{ subform.form.delete() }}
-              <button type="button" class="btn btn-outline-danger btn-small mark-delete">Remove Project</button>
-            </div>
           </div>
         {% endfor %}
-      </div>
-      <div class="section-actions">
-        <button type="button" id="add-project" class="btn btn-secondary">+ Add Project</button>
       </div>
 
       <div class="save-actions">

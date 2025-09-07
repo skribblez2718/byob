@@ -67,7 +67,13 @@ def create_app(config_overrides: Dict[str, Any] | None = None) -> Flask:
     # User loader for Flask-Login
     @login_manager.user_loader
     def load_user(user_id: str) -> User | None:  # type: ignore[name-defined]
-        return User.query.get(int(user_id))
+        try:
+            from app.models.user import User
+            from app.utils.db_retry import safe_db_operation
+            return safe_db_operation(db.session.get, User, int(user_id))
+        except Exception as e:
+            current_app.logger.error(f"Error loading user {user_id}: {str(e)}")
+            return None
         
     # Template context processor for JS modules and script nonce
     @app.context_processor

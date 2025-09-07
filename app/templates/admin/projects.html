@@ -26,8 +26,13 @@
   {% endwith %}
 
   {% if projects and projects|length > 0 %}
-    <table class="posts-table">
+    <div class="projects-reorder-info">
+      <p><i class="drag-icon">⋮⋮</i> Drag and drop projects to reorder them</p>
+    </div>
+    
+    <table class="posts-table" id="projects-table">
       <colgroup>
+        <col class="col-drag" />
         <col class="col-title" />
         <col class="col-created" />
         <col class="col-updated" />
@@ -35,15 +40,19 @@
       </colgroup>
       <thead>
         <tr>
+          <th class="col-drag"></th>
           <th class="col-title">Project</th>
           <th class="col-created">Created</th>
           <th class="col-updated">Updated</th>
           <th class="col-actions">Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="projects-tbody">
         {% for p in projects %}
-        <tr>
+        <tr data-project-hex-id="{{ p.hex_id }}" class="draggable-row">
+          <td class="col-drag">
+            <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
+          </td>
           <td class="col-title">
             <div class="admin-project-cell">
               {% if p.project_image_url %}

@@ -27,12 +27,14 @@ from app.utils.crypto import (
     hash_backup_code,
     verify_backup_code,
 )
+from app.utils.db_retry import retry_db_operation
 
-
+@retry_db_operation(max_retries=3)
 def find_user_by_username(username: str) -> User | None:
     return get_user_by_username(username)
 
 
+@retry_db_operation(max_retries=3)
 def authenticate(username: str, password: str) -> Tuple[User | None, str | None]:
     """
     Authenticate user with rate limiting.
@@ -77,6 +79,7 @@ def authenticate(username: str, password: str) -> Tuple[User | None, str | None]
     return user, None
 
 
+@retry_db_operation(max_retries=3)
 def verify_mfa_with_rate_limiting(user: User, code: str) -> Tuple[bool, str | None]:
     """
     Verify MFA code with rate limiting.

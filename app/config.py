@@ -21,11 +21,16 @@ class Config:
     SQLALCHEMY_DATABASE_URI: str | None = os.environ.pop("DATABASE_URL", None)
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
 
-    # Ensure we use the 'blog' schema in Postgres
+    # Ensure we use the 'blog' schema in Postgres with connection pooling
     SQLALCHEMY_ENGINE_OPTIONS = {
         "connect_args": {
             "options": "-c search_path=blog"
-        }
+        },
+        "pool_size": int(os.getenv("DB_POOL_SIZE", "10")),
+        "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "20")),
+        "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "30")),
+        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "3600")),  # 1 hour
+        "pool_pre_ping": True,  # Validate connections before use
     }
 
 

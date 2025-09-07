@@ -14,6 +14,7 @@ from app.repositories.project import (
     replace_project_data,
     list_project_data,
     create_project,
+    reorder_projects,
 )
 from app.extensions import db
 
@@ -176,6 +177,32 @@ def update_projects(projects_data, files):
         return jsonify({
             "error": "An unexpected error occurred while processing your request"
         }), 500
+
+
+@bp.route('/reorder', methods=['POST'])
+@login_required
+@admin_required
+@mfa_required
+def reorder_projects_api():
+    """Reorder projects by updating their display_order"""
+    try:
+        data = request.get_json()
+        if not data or 'project_hex_ids' not in data:
+            return jsonify({"error": "project_hex_ids required"}), 400
+        
+        project_hex_ids = data['project_hex_ids']
+        if not isinstance(project_hex_ids, list):
+            return jsonify({"error": "project_hex_ids must be a list"}), 400
+        
+        # Update the project order
+        reorder_projects(current_user.id, project_hex_ids)
+        
+        return jsonify({"message": "Projects reordered successfully"}), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error reordering projects: {str(e)}", exc_info=True)
+        return jsonify({"error": "An error occurred while reordering projects"}), 500
 
 
 @bp.route('/create', methods=['POST'])

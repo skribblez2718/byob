@@ -96,3 +96,25 @@ def replace_project_data(user_id: int, projects: list[dict]) -> None:
     
     # Commit all changes to the database
     db.session.commit()
+
+
+def reorder_projects(user_id: int, project_hex_ids: list[str]) -> None:
+    """Reorder projects by updating their display_order based on the provided hex_id list"""
+    # Get all projects for the user
+    projects = list(
+        db.session.execute(
+            db.select(Project)
+            .filter_by(user_id=user_id)
+        ).scalars()
+    )
+    
+    # Create a mapping of hex_id to project
+    project_map = {p.hex_id: p for p in projects}
+    
+    # Update display_order based on the order in the hex_ids list
+    for order, hex_id in enumerate(project_hex_ids):
+        if hex_id in project_map:
+            project_map[hex_id].display_order = order
+    
+    # Commit the changes
+    db.session.commit()
