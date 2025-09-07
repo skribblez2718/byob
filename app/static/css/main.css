@@ -317,7 +317,7 @@ h1, h2, h3, h4, h5, h6 { color: inherit; }
 /* === HERO SECTION === */
 .hero {
   padding: clamp(3rem, 6vw, 6rem) 0 clamp(1.5rem, 4vw, 3rem);
-  text-align: center;
+  text-align: left;
   position: relative;
   z-index: 1; /* ensure above decorative overlays */
   display: flex;
@@ -339,7 +339,7 @@ h1, h2, h3, h4, h5, h6 { color: inherit; }
   font-size: clamp(2rem, 6vw, 3.25rem);
 }
 .hero-title .highlight { color: var(--accent); }
-.hero .lead { color: var(--muted); max-width: 60ch; margin: 0 auto; font-size: 1.05rem; text-align: left;}
+.hero .lead { color: var(--muted); max-width: 60ch; margin: 0; font-size: 1.05rem; text-align: left;}
 
 /* Mobile: remove horizontal offset for narrow screens */
 @media (max-width: 640px) {
