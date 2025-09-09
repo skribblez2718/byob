@@ -84,13 +84,16 @@ def sanitize_blog_paragraph(paragraph_content: str) -> str:
     # Use a more restrictive set for paragraphs
     paragraph_tags = [
         'strong', 'b', 'em', 'i', 'u', 's', 'mark', 'small', 'sup', 'sub',
-        'a', 'code', 'br', 'span'
+        'a', 'code', 'br', 'span', 'ul', 'ol', 'li'
     ]
     
     paragraph_attributes = {
         'a': ['href', 'title', 'target', 'rel'],
-        'span': ['class'],
-        'code': ['class'],
+        'span': ['class', 'id'],
+        'code': ['class', 'id'],
+        'ul': ['class', 'id'],
+        'ol': ['class', 'id'],
+        'li': ['class', 'id']
     }
     
     cleaned_content = bleach.clean(
