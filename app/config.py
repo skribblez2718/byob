@@ -46,7 +46,7 @@ class Config:
     # Uploads and limits
     # Allow larger total request size for multiple file uploads (50MB total)
     # Individual file validation is still handled by validate_image() at 5MB per file
-    MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(50 * 1024 * 1024)))
+    # MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH", str(50 * 1024 * 1024)))
 
     # Caching (simple for dev)
     CACHE_TYPE = os.getenv("CACHE_TYPE", "SimpleCache")
