@@ -68,6 +68,7 @@ def validate_image(data: bytes, max_bytes: int = 5 * 1024 * 1024) -> Tuple[bool,
 def rewrite_image(
     data: bytes,
     target_format: Literal["PNG", "JPEG", "WEBP"] | None = None,
+    max_size: tuple[int, int] | None = None,
 ) -> tuple[bytes, str, str]:
     """Re-encode the image to destroy any embedded payloads and strip metadata.
     Returns (bytes, format, mime).
@@ -87,6 +88,10 @@ def rewrite_image(
     rand = secrets.randbelow(3)  # 0..2
 
     with Image.open(io.BytesIO(data)) as im:
+        # Resize if needed
+        if max_size and (im.width > max_size[0] or im.height > max_size[1]):
+            im.thumbnail(max_size, Image.Resampling.LANCZOS)
+
         # Convert modes for target formats
         if fmt in {"JPEG", "WEBP"}:
             if im.mode in ("RGBA", "LA"):
@@ -122,6 +127,7 @@ def validate_and_rewrite(
     data: bytes,
     original_filename: str | None = None,
     max_bytes: int = 5 * 1024 * 1024,
+    max_size: tuple[int, int] | None = None,
 ) -> tuple[bool, str | None, dict, bytes | None, str | None, str | None, str | None]:
     """Full OWASP flow: validate, then re-encode to strip payloads.
     Returns (ok, error, info, rewritten_bytes, detected_format, suggested_ext, safe_filename).
@@ -133,7 +139,7 @@ def validate_and_rewrite(
 
     # Guard against unexpected PIL processing errors
     try:
-        rewritten, fmt, mime = rewrite_image(data)
+        rewritten, fmt, mime = rewrite_image(data, max_size=max_size)
     except Exception as e:
         return False, "processing_error", {**info, "exception": type(e).__name__}, None, None, None, None
 
@@ -154,12 +160,16 @@ def validate_and_rewrite(
     return True, None, info, rewritten, fmt, suggested_ext, safe_filename
 
 
-def save_validated_image_to_uploads(data: bytes, original_filename: str | None = None) -> tuple[bool, str | None, dict, str | None]:
+def save_validated_image_to_uploads(
+    data: bytes, original_filename: str | None = None, max_size: tuple[int, int] | None = (720, 480)
+) -> tuple[bool, str | None, dict, str | None]:
     """Validate and rewrite then persist to static/uploads directory.
     Returns (ok, error, info, static_path) where static_path is like 'uploads/<file>'.
     """
     try:
-        ok, err, info, rewritten, fmt, suggested_ext, safe_filename = validate_and_rewrite(data, original_filename=original_filename)
+        ok, err, info, rewritten, fmt, suggested_ext, safe_filename = validate_and_rewrite(
+            data, original_filename=original_filename, max_size=max_size
+        )
         if not ok or not rewritten or not safe_filename:
             return False, err or "invalid_image", info, None
     except Exception as e:
@@ -182,6 +192,7 @@ def save_validated_image_to_subdir(
     data: bytes,
     original_filename: str | None = None,
     subdir: str = "uploads/blog",
+    max_size: tuple[int, int] | None = (720, 480),
 ) -> tuple[bool, str | None, dict, str | None]:
     """Validate, rewrite, and persist image bytes under app static/<subdir>.
     Returns (ok, error, info, static_path) where static_path is like 'uploads/blog/<file>'.
@@ -189,7 +200,7 @@ def save_validated_image_to_subdir(
     """
     try:
         ok, err, info, rewritten, fmt, suggested_ext, safe_filename = validate_and_rewrite(
-            data, original_filename=original_filename
+            data, original_filename=original_filename, max_size=max_size
         )
         if not ok or not rewritten or not safe_filename:
             return False, err or "invalid_image", info, None
