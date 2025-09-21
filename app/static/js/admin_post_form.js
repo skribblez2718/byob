@@ -37,22 +37,82 @@ document.addEventListener('DOMContentLoaded', function () {
     if (imgRow) imgRow.style.display = (t === 'image') ? '' : 'none';
   }
 
+  // Drag and drop state
+  let draggedBlock = null;
+  let draggedIndex = null;
+
+  function handleDragStart(e) {
+    draggedBlock = this;
+    draggedIndex = Array.from(container.children).indexOf(this);
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.outerHTML);
+  }
+
+  function handleDragOver(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+  }
+
+  function handleDragEnter(e) {
+    if (this !== draggedBlock) {
+      this.classList.add('drag-over');
+    }
+  }
+
+  function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    if (e.stopPropagation) {
+      e.stopPropagation();
+    }
+
+    if (draggedBlock !== this) {
+      // Determine if we're inserting before or after the target
+      const rect = this.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      const insertAfter = e.clientY > midpoint;
+
+      if (insertAfter) {
+        this.parentNode.insertBefore(draggedBlock, this.nextSibling);
+      } else {
+        this.parentNode.insertBefore(draggedBlock, this);
+      }
+
+      updateIndices();
+    }
+
+    return false;
+  }
+
+  function handleDragEnd(e) {
+    // Clean up
+    const blocks = container.querySelectorAll('.draggable-block');
+    blocks.forEach(block => {
+      block.classList.remove('dragging', 'drag-over');
+    });
+
+    draggedBlock = null;
+    draggedIndex = null;
+  }
+
   function bindBlock(blockEl) {
-    // move up/down
-    blockEl.querySelector('[data-move="up"]').addEventListener('click', () => {
-      const prev = blockEl.previousElementSibling;
-      if (prev) {
-        container.insertBefore(blockEl, prev);
-        updateIndices();
-      }
-    });
-    blockEl.querySelector('[data-move="down"]').addEventListener('click', () => {
-      const next = blockEl.nextElementSibling;
-      if (next) {
-        container.insertBefore(next, blockEl);
-        updateIndices();
-      }
-    });
+    // Enable drag and drop
+    blockEl.draggable = true;
+    blockEl.classList.add('draggable-block');
+
+    blockEl.addEventListener('dragstart', handleDragStart);
+    blockEl.addEventListener('dragover', handleDragOver);
+    blockEl.addEventListener('drop', handleDrop);
+    blockEl.addEventListener('dragend', handleDragEnd);
+    blockEl.addEventListener('dragenter', handleDragEnter);
+    blockEl.addEventListener('dragleave', handleDragLeave);
+
     // type change
     const typeSel = blockEl.querySelector('select[data-field="type"]');
     if (typeSel) typeSel.addEventListener('change', () => setTypeVisibility(blockEl));
@@ -62,9 +122,13 @@ document.addEventListener('DOMContentLoaded', function () {
   function createBlockEl(initial) {
     const idx = container.querySelectorAll('.block-item').length;
     const wrapper = document.createElement('div');
-    wrapper.className = 'block-item';
+    wrapper.className = 'block-item draggable-block';
     wrapper.dataset.index = String(idx);
+    wrapper.draggable = true;
     wrapper.innerHTML = `
+      <div class="block-header">
+        <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
+      </div>
       <div class="block-fields">
         <div class="field-row">
           <label>Type</label>
@@ -98,8 +162,6 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
       </div>
       <div class="block-controls">
-        <button type="button" class="btn btn-xs" data-move="up">↑</button>
-        <button type="button" class="btn btn-xs" data-move="down">↓</button>
         <label class="inline"><input type="checkbox" data-field="delete" name="${prefixName(idx,'delete')}"> Delete</label>
       </div>`;
 

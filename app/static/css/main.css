@@ -826,6 +826,35 @@ body {
   padding: 1rem;
 }
 
+/* Drag and drop styles for blocks */
+.draggable-block {
+  transition: all 0.2s ease;
+}
+
+.draggable-block:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.draggable-block.dragging {
+  opacity: 0.5;
+  transform: rotate(1deg);
+}
+
+.draggable-block.drag-over {
+  background: rgba(0, 123, 255, 0.1);
+  border-top: 2px solid #007bff;
+}
+
+.block-header {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.block-header .drag-handle {
+  font-size: 14px;
+}
+
 .block-fields .field-row {
   display: grid;
   grid-template-columns: auto 1fr auto 120px; /* label input label order */

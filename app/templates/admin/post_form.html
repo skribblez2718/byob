@@ -105,7 +105,10 @@
       <div id="blocks-container" class="blocks-container" data-prefix="content_blocks">
         {# Render existing blocks #}
         {% for entry in form.content_blocks %}
-          <div class="block-item" data-index="{{ loop.index0 }}">
+          <div class="block-item draggable-block" data-index="{{ loop.index0 }}" draggable="true">
+            <div class="block-header">
+              <div class="drag-handle" title="Drag to reorder">⋮⋮</div>
+            </div>
             <div class="block-fields">
               <div class="field-row">
                 <label>Type</label>
@@ -142,8 +145,6 @@
               {% endif %}
             </div>
             <div class="block-controls">
-              <button type="button" class="btn btn-xs" data-move="up">↑</button>
-              <button type="button" class="btn btn-xs" data-move="down">↓</button>
               <label class="inline">{{ entry.form.delete(**{'data-field': 'delete'}) }} Delete</label>
             </div>
           </div>
@@ -156,7 +157,7 @@
           {% endfor %}
         </div>
       {% endif %}
-      <small class="form-help">Reorder blocks with arrows. Delete marks a block for removal. Images are validated on submit.</small>
+      <small class="form-help"><i class="drag-icon">⋮⋮</i> Drag and drop blocks to reorder them. Delete marks a block for removal. Images are validated on submit.</small>
       <div class="block-toolbar">
         <button type="button" class="btn btn-small" data-action="add-heading">Add Heading</button>
         <button type="button" class="btn btn-small" data-action="add-paragraph">Add Paragraph</button>
