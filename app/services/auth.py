@@ -165,7 +165,18 @@ def verify_totp_code(user: User, code: str) -> bool:
 
 
 def generate_backup_codes(n: int = 8) -> list[str]:
-    return [secrets.token_hex(4) for _ in range(n)]  # 8 hex chars (~32 bits)
+    """Generate cryptographically secure backup codes.
+
+    Args:
+        n: Number of backup codes to generate (default: 8)
+
+    Returns:
+        List of backup codes with 64 bits of entropy each
+
+    Security note: Using 8 bytes (64 bits) of entropy provides strong protection
+    against brute force attacks. Each code has 16 hex characters.
+    """
+    return [secrets.token_hex(8) for _ in range(n)]  # 16 hex chars (64 bits of entropy)
 
 
 def set_backup_codes(user: User, codes: Iterable[str]) -> None:
