@@ -108,3 +108,6 @@ app/static/uploads/**
 
 # Ignore all files in img directory and subdirectories
 app/static/img/**
+
+# Claude Code context files
+CLAUDE.md
